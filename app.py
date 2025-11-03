@@ -45,7 +45,6 @@ def initialize_tools():
     logging.getLogger("paddleocr").setLevel(logging.WARNING)
     
     reader = PaddleOCR(
-        use_angle_cls=True,
         lang='en',         
 
     )
