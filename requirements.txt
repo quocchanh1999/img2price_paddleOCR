@@ -1,0 +1,15 @@
+streamlit
+pandas
+numpy
+joblib
+rapidfuzz
+nltk
+pillow
+scikit-learn
+xgboost
+google-generativeai
+openpyxl
+catboost
+paddlepaddle==3.0.0
+paddleocr==3.0.0 
+opencv-python-headless==4.10.0.84
