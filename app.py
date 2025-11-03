@@ -37,13 +37,25 @@ def initialize_tools():
     try:
         nltk.data.find('tokenizers/punkt')
     except LookupError:
-        nltk.download('punkt')
+        nltk.download('punkt', quiet=True)
+    
     stemmer = SnowballStemmer("english")
-    reader_vi = PaddleOCR(use_angle_cls=True, lang='vi', use_gpu=False)
-    reader_en = PaddleOCR(use_angle_cls=True, lang='en', use_gpu=False)
-    return stemmer, reader_vi, reader_en
+    
+    # Tắt log
+    import logging
+    logging.getLogger("paddleocr").setLevel(logging.WARNING)
+    
+    # CHỈ DÙNG 1 READER, lang='en' → nhận diện TỐT cả tiếng Việt + Anh
+    reader = PaddleOCR(
+        use_angle_cls=True,
+        lang='en',           # <-- QUAN TRỌNG: chỉ dùng 'en'
+        use_gpu=False,
+        show_log=False
+    )
+    return stemmer, reader  # <-- Trả về 1 reader duy nhất
 
-stemmer, ocr_reader_vi, ocr_reader_en = initialize_tools()
+# GỌI CHỈ 2 BIẾN
+stemmer, ocr_reader = initialize_tools()
 
 @st.cache_resource
 def load_artifacts():
@@ -400,25 +412,26 @@ if df_full is not None:
     if uploaded_file is not None:
         image_bytes = uploaded_file.getvalue()
         st.image(uploaded_file, use_container_width=True)
-        with st.spinner("Đang đọc ảnh với OCR song song (Vi/En)..."):
+        
+        with st.spinner("Đang OCR (tiếng Việt + Anh)..."):
             image = Image.open(io.BytesIO(image_bytes))
             img_np = np.array(image)
-            result_vi = ocr_reader_vi.ocr(img_np, cls=True)
-            result_en = ocr_reader_en.ocr(img_np, cls=True)
-            texts = set()
-            if result_vi and result_vi[0] is not None:
-                for line in result_vi[0]:
-                    texts.add(line[1][0])
-            if result_en and result_en[0] is not None:
-                for line in result_en[0]:
-                    texts.add(line[1][0])
-            ocr_text = " ".join(texts)
+            
+            result = ocr_reader.ocr(img_np, cls=True)  # <-- DÙNG ocr_reader
+            ocr_text = ""
+            if result and result[0]:
+                lines = [line[1][0] for line in result[0]]
+                ocr_text = " ".join(lines)
+        
         if not ocr_text.strip():
-            st.warning("Không nhận dạng được văn bản từ ảnh. Hãy thử ảnh rõ nét hơn.")
+            st.warning("Không nhận dạng được văn bản.")
+            st.stop()
+        
         query_to_process = ocr_text
         source = "ocr"
-        with st.expander("Xem toàn bộ văn bản nhận dạng được"):
-            st.text_area("", ocr_text, height=150)
+        
+        with st.expander("Xem văn bản nhận dạng được"):
+            st.text_area("", ocr_text, height=150, label_visibility="collapsed")
     elif user_query_text:
         query_to_process = user_query_text
 
