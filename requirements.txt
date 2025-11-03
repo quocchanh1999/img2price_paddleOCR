@@ -10,6 +10,6 @@ xgboost
 google-generativeai
 openpyxl
 catboost
-paddlepaddle==3.0.0
-paddleocr==3.0.0 
+paddlepaddle
+paddleocr
 opencv-python-headless==4.10.0.84
