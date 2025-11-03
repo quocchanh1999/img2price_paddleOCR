@@ -40,21 +40,18 @@ def initialize_tools():
         nltk.download('punkt', quiet=True)
     
     stemmer = SnowballStemmer("english")
-    
-    # Tắt log
+
     import logging
     logging.getLogger("paddleocr").setLevel(logging.WARNING)
     
-    # CHỈ DÙNG 1 READER, lang='en' → nhận diện TỐT cả tiếng Việt + Anh
     reader = PaddleOCR(
         use_angle_cls=True,
-        lang='en',           # <-- QUAN TRỌNG: chỉ dùng 'en'
+        lang='en',         
         use_gpu=False,
-        show_log=False
-    )
-    return stemmer, reader  # <-- Trả về 1 reader duy nhất
 
-# GỌI CHỈ 2 BIẾN
+    )
+    return stemmer, reader  
+
 stemmer, ocr_reader = initialize_tools()
 
 @st.cache_resource
