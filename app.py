@@ -47,7 +47,6 @@ def initialize_tools():
     reader = PaddleOCR(
         use_angle_cls=True,
         lang='en',         
-        use_gpu=False,
 
     )
     return stemmer, reader  
